@@ -1,0 +1,47 @@
+テーマ：ベースとなるモデルを変更してみましょう。
+　Resnet18→Resnet50
+
+①Resnet50のパラメータをダウンロードしてくる
+　https://tmoribanner.hateblo.jp/entry/2019/10/15/170425
+	model_urls = {
+    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
+    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
+    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
+    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
+    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
+    'resnext50_32x4d': 'https://download.pytorch.org/models/resnext50_32x4d-7cdf4587.pth',
+    'resnext101_32x8d': 'https://download.pytorch.org/models/resnext101_32x8d-8ba56ff5.pth',
+    'wide_resnet50_2': 'https://download.pytorch.org/models/wide_resnet50_2-95faca4d.pth',
+    'wide_resnet101_2': 'https://download.pytorch.org/models/wide_resnet101_2-32ee1156.pth',
+}
+
+②ダウンロードした resnet50-19c8e357.pth を GoogleDriveに配置
+
+③コードを一部変更
+　変更後のコードをGit-Hubの以下に保存しました。
+　こちらを使って、学習してください。
+　（ひとまず、Transformは水平のみにしています）
+
+　2024_AIC2_thema1_main7_resnet50.ipynb
+
+　<変更点>
+	TARGET_NUM = 10
+	BATCH_SIZE = 64　
+　# resnet50は18に比べてメモリを多く消費する為、バッチサイズ(一度に処理する画像数)の数を少なくする。
+　# Colaboratoryで課金すればメモリを多く使えるので、ここも増やせると思います。
+	LEARNING_RATE = 0.01
+	EPOCH = 15
+	TRANSFER_LEARNING = True
+	MODEL_LEARNING = True
+	
+	#ResNet50モデル定義
+	def get_model(target_num,isPretrained=False):
+	    if(isPretrained):
+	        model_ft = models.resnet50(pretrained=False)
+	        model_ft.load_state_dict(torch.load(os.path.join(work_dir, '/content/sample_data/resnet50-19c8e357.pth'), map_location=lambda storage, loc: storage,weights_only=False), strict=True)
+	    else:
+	        model_ft = models.resnet50(pretrained=False)
+	    model_ft.fc = nn.Linear(2048, target_num)
+	    model_ft = model_ft.to(DEVICE)
+	    return model_ft
+
